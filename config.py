@@ -50,6 +50,9 @@ INDICATOR_SCORE_COL = {
     "ACC": "ACC_Score",
 }
 
+PROVINCES_TO_EXCLUDE = ['SULU', 'TAWI-TAWI', 'DAVAO DE ORO', 'COMPOSTELLA VALLEY', 'DINAGAT ISLANDS', 'DAVAO OCCIDENTAL']
+
+
 # ── Philippine island group → province mapping ───────────────────────────────────
 # Used for the national aggregated trend chart.
 ISLAND_GROUPS: dict[str, list[str]] = {

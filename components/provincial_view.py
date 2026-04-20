@@ -164,25 +164,25 @@ def _render_network_graph(
                 components.html(html, height=600, scrolling=False)
 
             with col_legend:
-                st.markdown("**Clan Legend**")
-                st.caption(f"{len(sorted_legend)} clan(s) · {G.number_of_nodes()} politicians")
-                st.markdown("---")
-                for comm, info in sorted_legend:
-                    # Colored swatch + label using HTML in st.markdown
-                    hex_color = info["color"]
-                    label     = info["label"]
-                    count     = info["count"]
-                    st.markdown(
-                        f"<div style='display:flex; align-items:center; "
-                        f"margin-bottom:6px; gap:8px;'>"
-                        f"<div style='width:14px; height:14px; border-radius:50%; "
-                        f"background:{hex_color}; flex-shrink:0;'></div>"
-                        f"<span style='font-size:13px; line-height:1.3;'>"
-                        f"<b>{label}</b><br>"
-                        f"<span style='color:#888; font-size:11px;'>{count} member(s)</span>"
-                        f"</span></div>",
-                        unsafe_allow_html=True,
-                    )
+                with st.container(border=True, height=590):
+                    st.markdown("**Clan Legend by Size**")
+                    st.caption(f"{len(sorted_legend)} clan(s) · {G.number_of_nodes()} politicians")
+                    for comm, info in sorted_legend:
+                        # Colored swatch + label using HTML in st.markdown
+                        hex_color = info["color"]
+                        label     = info["label"]
+                        count     = info["count"]
+                        st.markdown(
+                            f"<div style='display:flex; align-items:center; "
+                            f"margin-bottom:6px; gap:8px;'>"
+                            f"<div style='width:14px; height:14px; border-radius:50%; "
+                            f"background:{hex_color}; flex-shrink:0;'></div>"
+                            f"<span style='font-size:13px; line-height:1.3;'>"
+                            f"<b>{label}</b><br>"
+                            f"<span style='color:#888; font-size:11px;'>{count} member(s)</span>"
+                            f"</span></div>",
+                            unsafe_allow_html=True,
+                        )
 
         except Exception as exc:
             st.error(f"Network graph error: {exc}")
@@ -213,7 +213,7 @@ def _render_heatmap(
         hm_pivot,
         color_continuous_scale="Reds",
         aspect="auto",
-        title=f"Positions Held by Top Clans — {province} {year}",
+        # title=f"Positions Held by Top Clans — {province} {year}",
         labels=dict(color="Count"),
     )
     fig.update_layout(xaxis_title="Clan (Last Name Mode)", yaxis_title="Position")
@@ -331,7 +331,7 @@ def _render_indicator_trend(
                     annotation_text=str(year), annotation_position="top right",
                 )
             fig.update_layout(
-                title=f"{INDICATOR_LABELS[indicator]} — {province}",
+                # title=f"{INDICATOR_LABELS[indicator]} — {province}",
                 xaxis_title="Election Year",
                 yaxis_title="Score",
                 hovermode="x unified",
@@ -364,12 +364,12 @@ def _render_positions_over_time(
     fig = px.area(
         raw,
         x="Year", y="Count", color="Clan Label",
-        title=f"Positions Held by Top Clans — {province}",
+        # title=f"Positions Held by Top Clans — {province}",
         labels={"Count": "Positions Held", "Year": "Election Year"},
     )
     fig.update_layout(
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        legend=dict(orientation="h", yanchor="bottom", y=1.01),
     )
     st.plotly_chart(fig, width='stretch')
 
@@ -392,7 +392,7 @@ def _render_weighted_degree_bar(
                 wdeg_df,
                 x="Weighted Degree", y="Politician",
                 orientation="h",
-                title=f"Top 15 by Weighted Degree — {province} {year}",
+                # title=f"Top 15 by Weighted Degree — {province} {year}",
                 color="Weighted Degree",
                 color_continuous_scale="Reds",
             )
@@ -412,7 +412,6 @@ def render(
     year: int,
     label_map: dict,
 ) -> None:
-    st.caption('🏛️ PROVINCIAL ANALYSIS')
     st.header(f"{province}")
 
     _render_kpis(df, precomp, province, year)

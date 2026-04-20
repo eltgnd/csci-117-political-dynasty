@@ -28,6 +28,9 @@ with st.sidebar:
         f"{df['Year'].min()}–{df['Year'].max()}"
     )
 
+    st.caption('**Data Visualization** by Val Eltagonde')
+    st.caption('**Data and methodology** from Acuña, Alejandro, and Leung (2025) and Garcia & Montemayor (2026), Ateneo de Manila University.')
+
 # ── Render ────────────────────────────────────────────────────────────────────────
 
 search_view.render(df, label_map)

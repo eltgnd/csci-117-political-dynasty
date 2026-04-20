@@ -45,8 +45,7 @@ with st.sidebar:
         f"**{df['Province'].nunique()}** provinces · "
         f"{df['Year'].min()}–{df['Year'].max()}"
     )
-    if precomp is not None:
-        st.success("✓ Precomputed indicators loaded", icon="⚡")
+    st.write('Test')
 
 # ── Render ────────────────────────────────────────────────────────────────────────
 

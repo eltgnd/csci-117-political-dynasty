@@ -14,7 +14,7 @@ from data_loader import (
     get_community_label_map,
     get_available_years,
 )
-from config import ELECTION_YEARS
+from config import ELECTION_YEARS, PROVINCES_TO_EXCLUDE
 from components import provincial_view
 
 st.set_page_config(
@@ -42,7 +42,9 @@ with st.sidebar:
         value=avail_years[-1] if avail_years else 2022,
     )
 
+
     provinces = sorted(df["Province"].dropna().unique().tolist())
+    provinces = [p for p in provinces if p not in PROVINCES_TO_EXCLUDE]
     province  = st.selectbox("Province", provinces)
 
     st.markdown("---")
@@ -51,8 +53,8 @@ with st.sidebar:
         f"**{df['Province'].nunique()}** provinces · "
         f"{df['Year'].min()}–{df['Year'].max()}"
     )
-    if precomp is not None:
-        st.success("✓ Precomputed indicators loaded", icon="⚡")
+    st.caption('**Data Visualization** by Val Eltagonde')
+    st.caption('**Data and methodology** from Acuña, Alejandro, and Leung (2025) and Garcia & Montemayor (2026), Ateneo de Manila University.')
 
 # ── Render ────────────────────────────────────────────────────────────────────────
 

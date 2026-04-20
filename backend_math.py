@@ -22,6 +22,7 @@ def get_adjacency_matrix(data, province, year):
     r = data[(data["PROVINCE"] == province) & (data["YEAR"] == year)]
     rnew = r[["FIRST NAME", "MIDDLE NAME", "LAST NAME", "YEAR", "POSITION WEIGHT"]].fillna("")
 
+    rnew = rnew.copy()
     rnew["FULL NAME"] = rnew["FIRST NAME"] + " " + rnew["MIDDLE NAME"] + " " + rnew["LAST NAME"]
 
     # Keep all unique entries
@@ -52,7 +53,17 @@ def get_adjacency_matrix(data, province, year):
 
 ### GENERATE GRAPH ###
 def generate_graph(data, province, year):
+    data = data.copy()
     data.columns = [c.upper() for c in data.columns]
+
+    # Ensure FULL NAME column exists
+    if "FULL NAME" not in data.columns:
+        data["FULL NAME"] = (
+            data["FIRST NAME"].fillna("") + " " +
+            data["MIDDLE NAME"].fillna("") + " " +
+            data["LAST NAME"].fillna("")
+        ).str.strip()
+
     # Generate adjacency matrix
     am = get_adjacency_matrix(data, province, year)
 
@@ -61,8 +72,12 @@ def generate_graph(data, province, year):
 
     # Add node attributes from the merged data
     subset = data[(data["PROVINCE"] == province) & (data["YEAR"] == year)]
-    node_attrs = subset.set_index("FULL NAME")["COMMUNITY"].to_dict()
-    nx.set_node_attributes(G, node_attrs, "community")
+    community_attrs = subset.set_index("FULL NAME")["COMMUNITY"].to_dict()
+    nx.set_node_attributes(G, community_attrs, "community")
+
+    # Add position weight as node attribute
+    pw_attrs = subset.set_index("FULL NAME")["POSITION WEIGHT"].to_dict()
+    nx.set_node_attributes(G, pw_attrs, "position_weight")
 
     # Remove edges with zero weight to clean up the network
     zero_weight_edges = [(u, v) for u, v, w in G.edges(data="weight") if w == 0]
@@ -77,59 +92,57 @@ def generate_graph(data, province, year):
 def get_provincial_kpis(df, province, year):
     """
     Calculates political health KPIs for a specific province and year.
-    
-    Args:
-        df (pd.DataFrame): The main dataset containing all election records.
-        province (str): The province to analyze.
-        year (int): The election year to analyze.
-        
-    Returns:
-        dict: A dictionary containing clan_concentration_pct, simultaneous_counter, 
-              and newcomer_rate_pct.
     """
+    # Normalize columns
+    df = df.copy()
+    df.columns = [c.strip() for c in df.columns]
 
-    # Filter dataset for the selected province and year
-    current_df = df[(df['Province'] == province) & (df['Year'] == year)]
-    
+    # Try to find the correct column names regardless of case
+    col_map = {c.upper(): c for c in df.columns}
+    province_col = col_map.get("PROVINCE", "Province")
+    year_col = col_map.get("YEAR", "Year")
+    community_col = col_map.get("COMMUNITY", "Community")
+    first_col = col_map.get("FIRST NAME", "First Name")
+    mid_col = col_map.get("MIDDLE NAME", "Middle Name")
+    last_col = col_map.get("LAST NAME", "Last Name")
+
+    current_df = df[(df[province_col] == province) & (df[year_col] == year)]
+
     if current_df.empty:
         return {
             "clan_concentration_pct": 0.0,
             "simultaneous_counter": 0,
             "newcomer_rate_pct": 0.0
         }
-        
+
     total_positions = len(current_df)
-    
-    # Calculate Community sizes for the current year
-    community_counts = current_df['Community'].value_counts()
-    
+    community_counts = current_df[community_col].value_counts()
+
     # 1. Simultaneous Counter
-    # The maximum number of individuals belonging to the exact same clan (Community) 
-    # holding office at the same time in this specific year.
     simultaneous_counter = int(community_counts.max()) if not community_counts.empty else 0
-    
+
     # 2. Clan Concentration Percentage
-    # Defined as the percentage of total positions held by individuals who are part 
-    # of a clan (where a clan is a Community with more than 1 member in office).
     dynastic_communities = community_counts[community_counts > 1].index
-    dynasty_members = current_df[current_df['Community'].isin(dynastic_communities)]
+    dynasty_members = current_df[current_df[community_col].isin(dynastic_communities)]
     clan_concentration_pct = float(round((len(dynasty_members) / total_positions) * 100, 2))
-    
+
     # 3. Newcomer Rate Percentage
-    # Percentage of politicians in the current year who have no prior record of 
-    # holding office in this province in any previous year.
-    current_names = (current_df['First Name'].astype(str) + " " + 
-                     current_df['Middle Name'].astype(str) + " " + 
-                     current_df['Last Name'].astype(str)).str.lower()
-                     
-    historical_df = df[(df['Province'] == province) & (df['Year'] < year)]
-    historical_names = (historical_df['First Name'].astype(str) + " " + 
-                        historical_df['Middle Name'].astype(str) + " " + 
-                        historical_df['Last Name'].astype(str)).str.lower()
-                        
+    current_names = (
+        current_df[first_col].astype(str) + " " +
+        current_df[mid_col].astype(str) + " " +
+        current_df[last_col].astype(str)
+    ).str.lower()
+
+    historical_df = df[(df[province_col] == province) & (df[year_col] < year)]
+    historical_names = (
+        historical_df[first_col].astype(str) + " " +
+        historical_df[mid_col].astype(str) + " " +
+        historical_df[last_col].astype(str)
+    ).str.lower()
+
     newcomers = current_names[~current_names.isin(historical_names)]
     newcomer_rate_pct = float(round((len(newcomers) / total_positions) * 100, 2))
-    
+
     return {
         "clan_concentration_pct": clan_concentration_pct,
         "simultaneous_counter": simultaneous_counter,
@@ -141,38 +154,169 @@ def get_provincial_kpis(df, province, year):
 
 
 def get_hhi_index_per_province(data, year):
+    data = data.copy()
     data.columns = [c.upper() for c in data.columns]
 
     provinces = data['PROVINCE'].unique()
     hhi_values = []
-    
+
     for province in provinces:
-        # Get all positions in the province in the selected year
         dfX = data[(data['YEAR'] == year) & (data['PROVINCE'] == province)]
 
-        # Get list of all unique community IDs
         cols = list(dfX['COMMUNITY'].unique())
-        communities = []
-        for community in cols:
-            if community not in communities:
-                communities.append(community)
-        communities = sorted(communities)
+        communities = sorted(set(cols))
 
-        # Convert to DataFrame
         hhi = pd.DataFrame(communities, columns=['COMMUNITY'])
 
-        # Get position score per community
         total = dfX['POSITION WEIGHT'].sum()
-        scores = []
-        for community in communities:
-            score = dfX[dfX['COMMUNITY'] == community]['POSITION WEIGHT'].sum()
-            scores.append(score)
+        if total == 0:
+            hhi_values.append(0.0)
+            continue
 
+        scores = [dfX[dfX['COMMUNITY'] == c]['POSITION WEIGHT'].sum() for c in communities]
         hhi['SEATS'] = scores
         hhi['SEAT SHARES'] = hhi['SEATS'] / total
-
         hh_index = np.square(100 * hhi['SEAT SHARES']).sum()
         hhi_values.append(hh_index)
-    
+
     return pd.DataFrame({"Province": provinces, "HHI_Score": hhi_values})
-        
+
+
+##############  NEW INDICES  ##############
+
+
+def _gini(array: np.ndarray) -> float:
+    """Compute the Gini coefficient of a 1-D array."""
+    array = array.flatten().astype(float)
+    if array.size == 0:
+        return 0.0
+    if np.amin(array) < 0:
+        array -= np.amin(array)
+    array += 1e-7  # avoid zeros
+    array = np.sort(array)
+    n = array.shape[0]
+    index = np.arange(1, n + 1)
+    return float(np.sum((2 * index - n - 1) * array) / (n * np.sum(array)))
+
+
+def get_cgc_per_province(data, year):
+    """
+    Clan Gini Coefficient (CGC): Gini coefficient of weighted degree centrality
+    per province for a given year. Higher = more centralized power.
+
+    Returns:
+        pd.DataFrame with columns ['Province', 'CGC_Score']
+    """
+    data = data.copy()
+    data.columns = [c.upper() for c in data.columns]
+    provinces = data['PROVINCE'].unique()
+    results = []
+    for province in provinces:
+        subset = data[(data['PROVINCE'] == province) & (data['YEAR'] == year)]
+        if subset.empty:
+            results.append({'Province': province, 'CGC_Score': 0.0})
+            continue
+        am = get_adjacency_matrix(data, province, year)
+        G = nx.from_pandas_adjacency(am)
+        degrees = np.array([d for _, d in G.degree(weight='weight')], dtype=float)
+        results.append({'Province': province, 'CGC_Score': _gini(degrees)})
+    return pd.DataFrame(results)
+
+
+def get_ccd_per_province(data, year):
+    """
+    Clan Connectivity Density (CCD): 1 - (number of connected components / total positions).
+    Higher = more interconnected dynasty network.
+
+    Returns:
+        pd.DataFrame with columns ['Province', 'CCD_Score']
+    """
+    data = data.copy()
+    data.columns = [c.upper() for c in data.columns]
+    provinces = data['PROVINCE'].unique()
+    results = []
+    for province in provinces:
+        subset = data[(data['PROVINCE'] == province) & (data['YEAR'] == year)]
+        total = len(subset)
+        if total == 0:
+            results.append({'Province': province, 'CCD_Score': 0.0})
+            continue
+        am = get_adjacency_matrix(data, province, year)
+        G = nx.from_pandas_adjacency(am)
+        n_components = nx.number_connected_components(G)
+        ccd = float(1 - n_components / total)
+        results.append({'Province': province, 'CCD_Score': ccd})
+    return pd.DataFrame(results)
+
+
+def get_acc_per_province(data, year):
+    """
+    Aggregate Clan Connectivity (ACC): For each community in a province, compute
+    node_connectivity(G_community) / |V(G_community)| and sum across all communities.
+    Higher = more internally resilient clan structures.
+
+    Returns:
+        pd.DataFrame with columns ['Province', 'ACC_Score']
+    """
+    data = data.copy()
+    data.columns = [c.upper() for c in data.columns]
+    data['MIDDLE NAME'] = data['MIDDLE NAME'].fillna('')
+    provinces = data['PROVINCE'].unique()
+    results = []
+    for province in provinces:
+        prov_df = data[(data['PROVINCE'] == province) & (data['YEAR'] == year)]
+        acc_sum = 0.0
+        for comm_id in prov_df['COMMUNITY'].unique():
+            sample = prov_df[prov_df['COMMUNITY'] == comm_id]
+            n = len(sample)
+            if n <= 1:
+                continue
+            surnames = sample['LAST NAME'].tolist()
+            mns = sample['MIDDLE NAME'].tolist()
+            adj = np.zeros((n, n), dtype=int)
+            for i in range(n):
+                for j in range(i + 1, n):
+                    if (surnames[i] == surnames[j] or
+                            (mns[i] and mns[i] == mns[j]) or
+                            surnames[i] == mns[j] or
+                            mns[i] == surnames[j]):
+                        adj[i, j] = adj[j, i] = 1
+            G_comm = nx.from_numpy_array(adj)
+            nc = nx.node_connectivity(G_comm)
+            acc_sum += nc / n
+        results.append({'Province': province, 'ACC_Score': acc_sum})
+    return pd.DataFrame(results)
+
+
+def get_provincial_indicator_trend(data, province, years):
+    """
+    Returns a DataFrame with all four dynastic indicators for a given province
+    across the specified list of election years.
+
+    Columns: ['Year', 'HHI', 'CGC', 'CCD', 'ACC']
+    """
+    rows = []
+    for year in years:
+        # HHI
+        hhi_df = get_hhi_index_per_province(data, year)
+        hhi_row = hhi_df[hhi_df['Province'] == province]
+        hhi_val = float(hhi_row['HHI_Score'].iloc[0]) if not hhi_row.empty else 0.0
+
+        # CGC
+        cgc_df = get_cgc_per_province(data, year)
+        cgc_row = cgc_df[cgc_df['Province'] == province]
+        cgc_val = float(cgc_row['CGC_Score'].iloc[0]) if not cgc_row.empty else 0.0
+
+        # CCD
+        ccd_df = get_ccd_per_province(data, year)
+        ccd_row = ccd_df[ccd_df['Province'] == province]
+        ccd_val = float(ccd_row['CCD_Score'].iloc[0]) if not ccd_row.empty else 0.0
+
+        # ACC
+        acc_df = get_acc_per_province(data, year)
+        acc_row = acc_df[acc_df['Province'] == province]
+        acc_val = float(acc_row['ACC_Score'].iloc[0]) if not acc_row.empty else 0.0
+
+        rows.append({'Year': year, 'HHI': hhi_val, 'CGC': cgc_val, 'CCD': ccd_val, 'ACC': acc_val})
+
+    return pd.DataFrame(rows)

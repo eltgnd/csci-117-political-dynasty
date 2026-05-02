@@ -26,7 +26,7 @@ st.subheader("About the Project")
 with st.container(border=True):
     st.markdown("#### 🏛️ Why should we care about political dynasties?")
     st.markdown("""
-    The Philippines is one of the **most dynastic democracies in the world** — and the highest-ranking in Asia.
+    The Philippines is one of the **most dynastic democracies in the world**.
     From 2004 to 2022, dynastic politicians grew from holding ~40% to over 50% of elected positions.
     By the 2025 elections, dynasties controlled **87% of provincial governments**.
     Despite constitutional safeguards, political families routinely rotate positions among relatives —

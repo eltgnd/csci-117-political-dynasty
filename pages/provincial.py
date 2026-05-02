@@ -48,12 +48,7 @@ with st.sidebar:
     province  = st.selectbox("Province", provinces)
 
     st.markdown("---")
-    st.caption(
-        f"**{len(df):,}** records · "
-        f"**{df['Province'].nunique()}** provinces · "
-        f"{df['Year'].min()}–{df['Year'].max()}"
-    )
-    st.caption('**Data Visualization** by Val Eltagonde')
+    st.caption('**Data Visualization** by Val Eltagonde.')
     st.caption('**Data and methodology** from Acuña, Alejandro, and Leung (2025) and Garcia & Montemayor (2026), Ateneo de Manila University.')
 
 # ── Render ────────────────────────────────────────────────────────────────────────

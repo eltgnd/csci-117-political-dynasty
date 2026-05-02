@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from config import DATA_PATH, PRECOMPUTED_PATH, ELECTION_YEARS, ISLAND_GROUPS
+from config import DATA_PATH, PRECOMPUTED_PATH, ELECTION_YEARS
 from backend_math import (
     get_hhi_index_per_province,
     get_cgc_per_province,
@@ -60,47 +60,55 @@ def load_precomputed() -> pd.DataFrame | None:
 
 # ── Lookup helpers ───────────────────────────────────────────────────────────────
 
+COMMUNITY_LABELS_PATH = "data/community_labels.csv"
+
+@st.cache_data
+def load_community_labels() -> pd.DataFrame | None:
+    """Load precomputed clan labels CSV. Returns None if file not found."""
+    if not os.path.exists(COMMUNITY_LABELS_PATH):
+        st.warning(
+            f"⚠️ Precomputed clan labels not found at `{COMMUNITY_LABELS_PATH}`. "
+            "Run `python precompute_community_labels.py` to generate it. "
+            "Falling back to on-demand computation (slower).",
+            icon="⚠️",
+        )
+        return None
+    df = pd.read_csv(COMMUNITY_LABELS_PATH)
+    df["Community"] = df["Community"].astype(int)
+    return df
+
+
 @st.cache_data
 def get_community_label_map(df: pd.DataFrame) -> dict:
     """
-    Map (province, community_int) → "{mode1}-{mode2}" label.
-
-    mode1 = most frequent value across the union of Last Name + Middle Name
-            for that (province, community) group.
-    mode2 = second most frequent value (different from mode1).
-
-    Middle names that are empty/NaN are excluded before counting.
-    Falls back to a single name if there is no second mode.
+    Returns dict keyed by (province, community_int) → "{mode1}-{mode2}" label.
+    Uses precomputed CSV if available; falls back to live computation.
     """
+    labels_df = load_community_labels()
+
+    if labels_df is not None:
+        return {
+            (row["Province"], row["Community"]): row["Label"]
+            for _, row in labels_df.iterrows()
+        }
+
+    # --- live fallback (original logic) ---
     result = {}
     for (province, community), group in df.groupby(["Province", "Community"]):
-        # Combine Last Name and Middle Name into one frequency series,
-        # filtering out empty/null strings from Middle Name.
         last_names   = group["Last Name"].dropna().astype(str)
         middle_names = (
-            group["Middle Name"]
-            .dropna()
-            .astype(str)
+            group["Middle Name"].dropna().astype(str)
             .pipe(lambda s: s[s.str.strip() != ""])
         )
         combined = pd.concat([last_names, middle_names], ignore_index=True)
-
         if combined.empty:
             result[(province, community)] = str(community)
             continue
-
-        freq = combined.value_counts()
-
+        freq  = combined.value_counts()
         mode1 = freq.index[0]
-        # mode2: next most frequent value that is different from mode1
         mode2_candidates = freq.index[freq.index != mode1]
-        if len(mode2_candidates) > 0:
-            label = f"{mode1}-{mode2_candidates[0]}"
-        else:
-            label = mode1
-
+        label = f"{mode1}-{mode2_candidates[0]}" if len(mode2_candidates) > 0 else mode1
         result[(province, community)] = label
-
     return result
 
 

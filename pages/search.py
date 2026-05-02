@@ -22,12 +22,6 @@ label_map = get_community_label_map(df)
 # ── Sidebar info ──────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.caption(
-        f"**{len(df):,}** records · "
-        f"**{df['Province'].nunique()}** provinces · "
-        f"{df['Year'].min()}–{df['Year'].max()}"
-    )
-
     st.caption('**Data Visualization** by Val Eltagonde')
     st.caption('**Data and methodology** from Acuña, Alejandro, and Leung (2025) and Garcia & Montemayor (2026), Ateneo de Manila University.')
 

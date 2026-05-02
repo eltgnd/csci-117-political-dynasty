@@ -1,6 +1,5 @@
 """
 app.py
-Philippine Clan Watch Dashboard — navigation entry point only.
 
 Run with:
     streamlit run app.py

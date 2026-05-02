@@ -13,64 +13,88 @@ st.set_page_config(page_title="About — PH Clan Watch", page_icon="🇵🇭", l
 
 st.title("🇵🇭 Philippine Dynasty Network Dashboard")
 
+with st.sidebar:
+    st.markdown("---")
+    st.caption('**Data Visualization** by Val Eltagonde.')
+    st.caption('**Data and methodology** from Acuña, Alejandro, and Leung (2025) and Garcia & Montemayor (2026), Ateneo de Manila University.')
+
 
 # ── About the Project ─────────────────────────────────────────────────────────────
 
 st.subheader("About the Project")
 
-tab1,tab2,tab3,tab4 = st.tabs(['Rationale', 'Goal', 'Acknowledgements', 'Disclaimer'])
-
-with tab1:
-    st.caption('WHY DO POLITICAL DYNASTIES MATTER IN THE PHILIPPINES')
-
-    st.markdown("""Political power in the Philippines has long been concentrated within families, making the nation one of the most dynastic democracies in the world—and the highest-ranking in Asia **[1]**. From 2004 to 2022, the proportion of elected positions held by dynastic politicians increased from around 40% to over 50%. By the 2025 elections, dynasties controlled an overwhelming 87% of provincial governments **[2]**. Despite constitutional provisions intended to prevent the monopolization of power, political families continuously circumvent term limits by rotating positions among relatives, acting as an institutional mechanism that reproduces power across generations **[3]**.""")
-
-with tab2:
-    st.caption('MOTIVATION AND GOAL')
-
-    st.markdown('''Traditionally, dynasties were simply categorized as "thin" (single-office succession) or "fat" (multiple relatives in office) **[4]**. However, these simple labels fail to capture the complex, evolving web of alliances and power distribution. This project shifts this approach by applying  **Graph Theory** and **Network Analysis**, fields in mathematics that can show provincial political environments as complex, interconnected networks. The hope is that this will allow voters and the general public to visually explore how political clans are structured, how power concentrates, and how deeply entrenched these networks are across the nation.''')
-
-with tab3:       
-    st.caption('ACKNOWLEDGEMENTS')
-
+# --- Rationale ---
+with st.container(border=True):
+    st.markdown("#### 🏛️ Why should we care about political dynasties?")
     st.markdown("""
-    This dashboard was developed as a final project for a Data Visualization class. The focus is visualizating the structure of political dynasties. To do this, I heavily rely on the meticulous data gathering, cleaning, and processing by the authors below. Without them, this project is not possible at all.""")
+    The Philippines is one of the **most dynastic democracies in the world** — and the highest-ranking in Asia.
+    From 2004 to 2022, dynastic politicians grew from holding ~40% to over 50% of elected positions.
+    By the 2025 elections, dynasties controlled **87% of provincial governments**.
+    Despite constitutional safeguards, political families routinely rotate positions among relatives —
+    reproducing power across generations.
+    """)
 
-    st.caption('DATA AND METHODOLOGY SOURCES')
+# --- Goal ---
+with st.container(border=True):
+    st.markdown("#### 🎯 What does this dashboard do?")
     st.markdown("""
-    The data, network definitions, and graph theory methodology powering this visualization are heavily adapted from independent academic research:
+    Traditional dynasty classifications — *thin* (single-office) or *fat* (multiple relatives) — 
+    are too simple to capture evolving power networks. This dashboard uses **Graph Theory** and 
+    **Network Analysis** to map provincial political environments as interconnected networks, 
+    helping voters visually explore how clans are structured and how deeply power is entrenched 
+    across the nation.
+    """)
 
-    * **Primary Data & Methodology Reference:** 
-        * R. Acuña, A. Alejandro, and R. Leung. The families that stay together: A network analysis of dynastic power in Philippine politics. arXiv. Undergraduate thesis, Ateneo de Manila University. 2025. url: https://arxiv.org/abs/2505.21280.
-            * The 2004–2022 historical dataset and the foundational methodology for measuring dynastic networks—including the graph theory principles, the Leiden community detection application, and the use of the HHI, CGC, CCD, and ACC metrics—are directly borrowed from their work.
-        * A. Garcia and L. Montemayor. Power in the Network: Dynastic Persistence, Network Structure, and Economic Development in Philippine Local Politics. Undergraduate thesis, Ateneo de Manila University. 2026.
-            * **Supplemental 2025 Data:** Department of the Interior and Local Government (DILG) Masterlist and the Commission on Elections (COMELEC).""")
+# --- Acknowledgements & Disclaimer (side by side) ---
+col1, col2 = st.columns([3, 2])
 
-with tab4:
-    st.caption('DISCLAIMER')
+with col1:
+    with st.expander("📚 Acknowledgements & Data Sources", expanded=False):
+        st.markdown("""
+        This dashboard was developed as a final project for a **Data Visualization class**.
+        It relies entirely on the data gathering and methodology of the researchers below.
+        
+        **Primary Reference**
+        > R. Acuña, A. Alejandro, and R. Leung. *The families that stay together: A network analysis 
+        of dynastic power in Philippine politics.* arXiv. Ateneo de Manila University, 2025.
+        [→ arXiv:2505.21280](https://arxiv.org/abs/2505.21280)
+        
+        The 2004-2022 dataset and methodology (Leiden community detection, HHI, CGC, CCD, ACC metrics) 
+        are directly borrowed from their work.
+        
+        **Supplemental 2025 Data**
+        > A. Garcia and L. Montemayor. *Power in the Network.* Ateneo de Manila University, 2026.
+        Supplemented with DILG Masterlist and COMELEC data.
+        """)
 
-    st.markdown("""*The creator of this dashboard is not affiliated with the original thesis research team. This project strictly utilizes their published datasets and methodological framework for educational and public data visualization purposes.*""")
+with col2:
+    with st.expander("⚠️ Disclaimer", expanded=False):
+        st.info("""
+        The creator of this dashboard is **not affiliated** with the original research teams. 
+        This project uses their published datasets and methodology strictly for 
+        **educational and public data visualization purposes**.
+        """)
 
 st.markdown("---")
 
 # ── Dataset & Scope ───────────────────────────────────────────────────────────────
 
-st.header("Dataset & Scope")
+st.subheader("Dataset & Scope")
 
 st.markdown("The data powering this dashboard spans eight election cycles over two decades, analyzing the inferred relationships of over 140,000 local officials.")
 
 col1, col2, col3 = st.columns(3, border=True)
-col1.metric("📅 Election Years", "2004 – 2025")
+col1.metric("📅 Election Years", "2004 - 2025")
 col2.metric("🔎 Positions Tracked", "7 Local Offices")
 col3.metric("🏠 Provinces Covered", "80")
 
 tab_sources, tab_scope, tab_positions = st.tabs(["Data Sources", "Geographical Scope", "Elected Positions"])
 
 with tab_sources:
-    st.markdown("The historical data (2004–2022) is adapted from the comprehensive dataset compiled by Acuña et al. (2025). The most recent 2025 election data was integrated using the Department of the Interior and Local Government (DILG) Masterlist and verified against Commission on Elections (COMELEC) records.")
+    st.markdown("The historical data (2004-2022) is adapted from the comprehensive dataset compiled by Acuña et al. (2025). Then, Garcia & Montemayor (2026) integrated the most recent 2025 election data using the Department of the Interior and Local Government (DILG) Masterlist and verified against Commission on Elections (COMELEC) records.")
 
 with tab_scope:
-    st.markdown("We map the networks of 80 provinces. *(Note: Sulu, Tawi-tawi, Compostela Valley, North Cotabato, Davao de Oro, Dinagat Islands, and Davao Occidental are excluded due to insufficient or incomplete data).*")
+    st.markdown("The networks of 80 provinces are mapped. *(Note: Sulu, Tawi-tawi, Compostela Valley, North Cotabato, Davao de Oro, Dinagat Islands, and Davao Occidental are excluded due to insufficient or incomplete data).*")
 
 with tab_positions:
     st.markdown("""
@@ -91,7 +115,7 @@ tab1, tab2, tab3, tab4, = st.tabs([
     "What is a graph?",
     "How are dynasty networks constructed?",
     "How are dynasties determined?",
-    "Dynastic indicators",
+    "How do we measure the strength of a dynasty?",
     # "How to read the dashboard",
 ])
 
@@ -107,10 +131,10 @@ with tab1:
       family ties inferred from their names.
 
     Networks let us move beyond looking at politicians as isolated individuals and
-    instead reveal the hidden family structures that bind them together.
+    instead reveal the hidden family structures that bind them together. Nodes with no edges are independent politicians with no detectable family ties to others in the same province and year.
     """)
 
-    st.markdown("#### Anatomy of a dynasty network")
+    st.markdown("#### Example of a dynasty network")
     with st.container(border=True):
         st.caption(
             "Hover over any element below. Node size reflects position weight; "
@@ -257,7 +281,7 @@ with tab1:
             hovermode="closest",
         )
 
-        st.plotly_chart(fig_net, use_container_width=True)
+        st.plotly_chart(fig_net, width='stretch')
 
     st.markdown("""
     | Visual element | What it encodes |
@@ -266,8 +290,6 @@ with tab1:
     | Node **size** | Position weight (Governor > Mayor > Councilor) |
     | Edge **thickness** | Relationship strength: consanguinity score × both positions' weights |
     | Cluster **density** | How entrenched a dynasty is — more edges = more interconnected family |""")
-
-    st.info('Nodes with no edges are independent politicians with no detectable family ties to others in the same province and year.')
 
 
 # ── Tab 2: Consanguinity scoring ──────────────────────────────────────────────────
@@ -292,7 +314,7 @@ with tab2:
         | Condition | Score | Interpretation |
         |---|:---:|---|
         | Same last name **and** same middle name | **1.00** | Identical branch — likely siblings or same person across roles |
-        | Same last name only | **0.75** | Paternal line — likely siblings, cousins, or parent–child |
+        | Same last name only | **0.75** | Paternal line — likely siblings, cousins, or parent-child |
         | Cross-match: one's last name = other's middle name | **0.50** | Maternal link — in-law or intermarriage |
         | Same middle name only | **0.25** | Shared maternal grandmother — distant common ancestor |
         | No match | **0.00** | No detectable family tie |
@@ -303,13 +325,6 @@ with tab2:
         - Last name: `SANTOS` = `SANTOS` ✓  
         - Middle name: `REYES` ≠ `CRUZ` ✗  
         - → **Score = 0.75** (same last name only)
-        """)
-        st.markdown("**Example: Gov. Ana Reyes-Santos vs. Rep. Juan Santos-Cruz**")
-        st.markdown("""
-        - Last name: `REYES` ≠ `SANTOS`  
-        - Gov's last `REYES` ≠ Rep's middle `CRUZ`  
-        - Gov's middle `SANTOS` = Rep's last `SANTOS` ✓  
-        - → **Score = 0.50** (cross-surname middle-name match)
         """)
 
     st.markdown("#### Step 2 — Edge weight calculation")
@@ -343,11 +358,9 @@ with tab2:
 
 # ── Tab 3: Community detection ────────────────────────────────────────────────────
 with tab3:
-    st.subheader("Community Detection — The Leiden Algorithm")
+    st.subheader("Community Detection via the Leiden Algorithm")
 
-    col_left, col_right = st.columns([1.6, 1])
-    with col_left:
-        st.markdown("""
+    st.markdown("""
         Once the weighted network is built, we face a core question:
         **which politicians form a single political dynasty?**
 
@@ -355,28 +368,15 @@ with tab3:
         can link families across many degrees of separation, creating sprawling
         networks that are hard to cut cleanly by hand.
 
-        We use the **Leiden algorithm**, a state-of-the-art community detection
+        To solve this, the **Leiden algorithm** is used, a state-of-the-art community detection
         method that identifies groups of nodes that are:
 
         - **Densely connected internally** (many strong edges within the group), and
         - **Sparsely connected externally** (few or weak edges to other groups).
 
-        Each resulting **Community ID** is our structural proxy for one political
+        The grouping produced by the algorithm becomes a structural proxy for one political
         dynasty. Politicians in the same community form a clan.
-        """)
-    with col_right:
-        st.info(
-            "**Why Leiden and not Louvain?**\n\n"
-            "The older Louvain algorithm can produce poorly connected or even "
-            "disconnected communities. Leiden guarantees that every detected "
-            "community is internally connected, making clan boundaries more "
-            "meaningful and stable."
-        )
-        st.success(
-            "**Resolution parameter:** Controls how finely the algorithm slices "
-            "the network. A higher value produces smaller, more granular clans; "
-            "a lower value merges related families into broader dynasties."
-        )
+    """)
 
     st.markdown("#### From network to dynasty: step by step")
 
@@ -411,11 +411,11 @@ with tab3:
 
 # ── Tab 4: Dynastic indicators ────────────────────────────────────────────────────
 with tab4:
-    st.subheader("Dynastic Indicators — Measuring Dynasty Strength")
+    st.subheader("Dynastic Indicators")
     st.markdown("""
     Four composite scores quantify different **dimensions** of political dynasty power
     in a province. They are computed from the weighted network and the position data,
-    and are available for every province–year pair in the dataset.
+    and are available for every province-year pair in the dataset.
     """)
 
     ind1, ind2, ind3, ind4 = st.tabs(["HHI", "CGC", "CCD", "ACC"])
@@ -433,7 +433,7 @@ with tab4:
         | Score range | Interpretation |
         |---|---|
         | < 1,500 | Competitive — power spread across many clans |
-        | 1,500 – 2,500 | Moderately concentrated |
+        | 1,500 - 2,500 | Moderately concentrated |
         | > 2,500 | Highly concentrated — one or two dominant clans |
         | 10,000 | Theoretical maximum (one clan holds all positions) |
 
@@ -451,7 +451,7 @@ with tab4:
         st.markdown("""
         where $d_i$ is the weighted degree of politician $i$ in the provincial network.
 
-        - **Range:** 0 – 1
+        - **Range:** 0 - 1
         - **G = 0:** Every politician has identical network influence (perfectly equal).
         - **G = 1:** One politician concentrates all network connections (maximum inequality).
 
@@ -508,89 +508,3 @@ with tab4:
     | Many intermarried clans forming one network | Med | Low | High | Med |
     | Competitive province, many small clans | Low | Low | Low | Low |
     """)
-
-
-# # ── Tab 5: How to read the dashboard ─────────────────────────────────────────────
-# with tab5:
-#     st.subheader("How to Read the Dashboard")
-
-#     st.markdown("#### Provincial Analysis page")
-#     charts_prov = {
-#         "Dynasty Network Graph": (
-#             "Each dot is a politician; dot size = position weight. "
-#             "Dots of the same color belong to the same clan. "
-#             "Lines between dots = inferred family ties; thicker = stronger relationship. "
-#             "**Hover over any node** to see the politician's name, clan, and position weight. "
-#             "Look for dense, large-node clusters — those are entrenched dynasties."
-#         ),
-#         "Clan × Position Heatmap": (
-#             "Rows = position types (Governor, Mayor, etc.). "
-#             "Columns = top clans (labeled by surname mode). "
-#             "**Dark red cells** = that clan dominates that office type. "
-#             "A clan with a dark cell in 'Governor' and 'Mayor' simultaneously holds executive power at multiple levels."
-#         ),
-#         "Dynastic Indicator Trend": (
-#             "One line chart per indicator (selectable via radio button). "
-#             "X-axis = election year; Y-axis = indicator score. "
-#             "A **rising trend** = dynasty power consolidating over time. "
-#             "The dotted vertical line marks the currently selected year."
-#         ),
-#         "Total Positions Over Time": (
-#             "Stacked area chart showing how many positions each top clan held across all election years. "
-#             "A clan that grows its area over time is expanding. "
-#             "A clan that shrinks or disappears lost power — by electoral loss, death, or fragmentation."
-#         ),
-#         "Top 15 by Weighted Degree": (
-#             "Horizontal bar chart of the most *connected* politicians in the network. "
-#             "Weighted degree = sum of all edge weights attached to a node. "
-#             "High weighted degree = politically powerful AND deeply embedded in a large family network. "
-#             "This is different from merely holding a high-weight position — a lone Governor with no family ties ranks low here."
-#         ),
-#     }
-#     for chart, desc in charts_prov.items():
-#         with st.expander(chart):
-#             st.markdown(desc)
-
-#     st.markdown("#### National Analysis page")
-#     charts_nat = {
-#         "Dynastic Concentration Map": (
-#             "Choropleth map of the Philippines colored by the selected indicator score. "
-#             "**Darker red = higher score** (more concentrated / more dynastic). "
-#             "Hover over any province to see the exact score. "
-#             "Switch between Map and Bar Chart modes using the radio button above."
-#         ),
-#         "Democracy Scatterplot": (
-#             "Each bubble is a province. "
-#             "X-axis = number of unique clans in power (more = more pluralistic). "
-#             "Y-axis = % of seats held by the single largest clan (higher = more dominated). "
-#             "**Ideal democratic position: bottom-right** (many clans, none dominant). "
-#             "**Danger zone: top-left** (few clans, one dominant). "
-#             "Bubble size = HHI score."
-#         ),
-#         "Island Group Trend": (
-#             "Line chart comparing mean indicator scores for Luzon, Visayas, Mindanao, and the Philippines overall. "
-#             "The dotted purple line is the national average. "
-#             "Use this to compare whether dynasty entrenchment is geographically concentrated."
-#         ),
-#         "Deep Root League Table": (
-#             "Ranks clans by the longest consecutive streak of election cycles in which "
-#             "they held at least one position, anywhere in the Philippines. "
-#             "Bar length = cycles; color intensity = total position weight accumulated. "
-#             "Hover to see which provinces the clan operates in."
-#         ),
-#     }
-#     for chart, desc in charts_nat.items():
-#         with st.expander(chart):
-#             st.markdown(desc)
-
-#     st.markdown("#### Politician Search page")
-#     st.markdown("""
-#     1. **Select a province** from the dropdown.
-#     2. **Type a name** (partial match is fine — try just a surname).
-#     3. If multiple matches appear, **select the exact politician** from the dropdown.
-#     4. **Choose an election year** — the radio shows only years where that politician
-#        appears in the dataset, along with the position they held that year.
-#     5. The **ego-graph** renders: the politician is in the center, all their
-#        family-network connections radiate outward to radius 2.
-#        Direct connections (radius 1) are listed in the table below.
-#     """)

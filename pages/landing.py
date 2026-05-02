@@ -14,7 +14,6 @@ st.set_page_config(page_title="About — PH Clan Watch", page_icon="🇵🇭", l
 st.title("🇵🇭 Philippine Dynasty Network Dashboard")
 
 with st.sidebar:
-    st.markdown("---")
     st.caption('**Data Visualization** by Val Eltagonde.')
     st.caption('**Data and methodology** from Acuña, Alejandro, and Leung (2025) and Garcia & Montemayor (2026), Ateneo de Manila University.')
 

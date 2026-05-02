@@ -23,6 +23,11 @@ st.set_page_config(
     layout="wide",
 )
 
+# ── Toast ──────────────────────────────────────────────────────────────
+
+st.toast('To change the province and more, open the sidebar.', icon='👋', duration='infinite')
+
+
 # ── Load shared data ──────────────────────────────────────────────────────────────
 
 df      = load_data()

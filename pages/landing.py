@@ -10,6 +10,7 @@ import math
 st.set_page_config(page_title="About — PH Clan Watch", page_icon="🇵🇭", layout="wide")
 
 # ── Hero ─────────────────────────────────────────────────────────────────────────
+st.toast('To change the province and more, open the sidebar.', icon='👋', duration='infinite')
 
 st.title("🇵🇭 Philippine Dynasty Network Dashboard")
 

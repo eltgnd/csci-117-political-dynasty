@@ -44,6 +44,8 @@ with st.container(border=True):
     across the nation.
     """)
 
+    st.page_link('pages/provincial.py', label='Dashboard', icon="📊")
+
 # --- Acknowledgements & Disclaimer (side by side) ---
 col1, col2 = st.columns([3, 2])
 

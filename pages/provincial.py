@@ -25,7 +25,7 @@ st.set_page_config(
 
 # ── Toast ──────────────────────────────────────────────────────────────
 
-st.toast('To change the province and more, open the sidebar.', icon='👋', duration='infinite')
+st.toast('Use the sidebar to change the province and election year!', icon='⚙️', duration='infinite')
 
 
 # ── Load shared data ──────────────────────────────────────────────────────────────
@@ -50,7 +50,8 @@ with st.sidebar:
 
     provinces = sorted(df["Province"].dropna().unique().tolist())
     provinces = [p for p in provinces if p not in PROVINCES_TO_EXCLUDE]
-    province  = st.selectbox("Province", provinces)
+    rizal_index = provinces.index('RIZAL')
+    province  = st.selectbox("Province", provinces, index=rizal_index)
 
     st.markdown("---")
     st.caption('**Data Visualization** by Val Eltagonde.')
